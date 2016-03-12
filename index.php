@@ -3,15 +3,15 @@ error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 function view_include($fileName, $vars = array())
 {
-    // Установка переменных для шаблона.
+    // Setting variables for the template.
     foreach ($vars as $k => $v)
     {
         $$k = $v;
     }
 
-    // Генерация HTML в строку.
+    // Generate HTML string.
     ob_start();
-    //Функция подключает файлы из папки theme
+    //The function connects the files from the theme folder
     include $fileName;
     return ob_get_clean();	
 }
@@ -155,7 +155,7 @@ else
 <head>
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">
-/* Да, я знаю, что JQuery тут - как из пушки по воробьям... */
+/*Yes, I know that JQuery here is like use a sledge-hammer to crack a nut. */
 google.load("jquery", "1.7");
 google.setOnLoadCallback(function() {
     $(function() {
