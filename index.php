@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', 'On');
+ini_set('display_errors', 'Off');
 function view_include($fileName, $vars = array())
 {
     // Setting variables for the template.
@@ -30,17 +30,17 @@ if(!empty($_POST))
     $_POST['memorytreshold'] *= 1048576;
 
 	$arPorts = array();
-	if($_POST['vendor'] == 'cisco')
+	if($_POST['vendor'] == 'eltex')
     {
-		if($_POST['100m'] > 100 || $_POST['1g'] > 100) exit;
-        for($p = 1; $p <= $_POST['100m']; $p++)
+		if($_POST['1g'] > 100 || $_POST['10g'] > 100) exit;
+        for($p = 49; $p <= $_POST['1g']; $p++)
         {
-			$arPorts['FE ' . $p] = sprintf('100%02d', $p);
+			$arPorts['GE ' . $p] = sprintf('100%02d', $p);
 		}
 		
-		for($p = 1; $p <= $_POST['1g']; $p++)
+		for($p = 105; $p <= $_POST['10g']; $p++)
         {
-			$arPorts['GE ' . $p] = sprintf('101%02d', $p);
+			$arPorts['10GE ' . $p] = sprintf('101%02d', $p);
 		}
 	}
 	else
@@ -121,23 +121,23 @@ if(!empty($_POST))
                     'tpl_name' => $_POST['name'],
                     'cpu_limit' => $_POST['cputreshold'],
                     'memory_limit' => $_POST['memorytreshold']);
-        $cisco_items = view_include('cisco_items.tpl', $info);;
-        $cisco_triggers = view_include('cisco_triggers.tpl', $info);;
-        $cisco_graphs = view_include('cisco_graphs.tpl', $info);;
+        $eltex_items = view_include('eltex_items.tpl', $info);;
+        $eltex_triggers = view_include('eltex_triggers.tpl', $info);;
+        $eltex_graphs = view_include('eltex_graphs.tpl', $info);;
     }
     else
     {
-        $cisco_items = '';
-        $cisco_triggers = '';
-        $cisco_graphs = '';
+        $eltex_items = '';
+        $eltex_triggers = '';
+        $eltex_graphs = '';
     }
     $info = array(
                     'community' => $_POST['community'],
                     'delay' => $_POST['interval'],
                     'tpl_name' => $_POST['name'],
-                    'cisco_items' => $cisco_items,
-                    'cisco_triggers' => $cisco_triggers,
-                    'cisco_graphs' => $cisco_graphs,
+                    'eltex_items' => $eltex_items,
+                    'eltex_triggers' => $eltex_triggers,
+                    'eltex_graphs' => $eltex_graphs,
                     'date' => date('d.m.y'),
                     'time' => date('H.i'),
                     'items' => $items,
@@ -150,6 +150,7 @@ if(!empty($_POST))
 else
 {
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -161,18 +162,18 @@ google.setOnLoadCallback(function() {
     $(function() {
         $('#mixed_ports').hide();
         $('input[name=vendor]').change(function() {
-            if($('input[name=vendor]:checked').val() == 'cisco')
+            if($('input[name=vendor]:checked').val() == 'eltex')
             {
-                $('#cisco_feat').show();
+                $('#eltex_feat').show();
                 $('#mixed_ports').hide();
-				$('#cisco_triggers').show();
-                $('#cisco_ports').show();                
+				$('#eltex_triggers').show();
+                $('#eltex_ports').show();                
             }
             else
             {
-                $('#cisco_feat').hide();
-                $('#cisco_ports').hide();
-				$('#cisco_triggers').hide();
+                $('#eltex_feat').hide();
+                $('#eltex_ports').hide();
+				$('#eltex_triggers').hide();
                 $('#mixed_ports').show();
             }
         });
@@ -184,11 +185,12 @@ google.setOnLoadCallback(function() {
 <body>
 <h1>Zabbix template generator for switches</h1>
 <form method="post">
-Template name <input type="text" name="name" value="Cisco_Catalyst"><br>
-Vendor <input type="radio" name="vendor" value="cisco" checked id="cisco"> <label for="cisco">Cisco</label> <input type="radio" name="vendor" value="junk" id="junk"> <label for="junk">Other</label><br>
-<div id="cisco_ports">
-Number of 100M ports <input type="text" name="100m" size="2"><br>
+Template name <input type="text" name="name" value="Eltex"><br>
+Vendor <input type="radio" name="vendor" value="eltex" checked id="eltex"> <label for="eltex">Eltex</label> <input type="radio" name="vendor" value="junk" id="junk"> <label for="junk">Other</label><br>
+<div id="eltex_ports">
 Number of 1G ports <input type="text" name="1g" size="2"><br>
+Number of 10G ports <input type="text" name="10g" size="2"><br>
+<!-- There are 10g ethernet and 10G  -->
 </div>
 <div id="mixed_ports">
 Number of ports <input type="text" name="mixed_ports"><br>
@@ -203,21 +205,22 @@ Check interval (sec) <input type="text" name="interval" value="60" size="3"><br>
 <input type="checkbox" name="itbroadcast" id="itbroadcast" checked> <label for="itbroadcast">Broadcast packets</label><br>
 <input type="checkbox" name="itunicast" id="itunicast"> <label for="itunicast">Unicast packets</label><br>
 <input type="checkbox" name="itmulticast" id="itmulticast"> <label for="itmulticast">Multicast packets</label><br>
-<div id="cisco_feat">
-<input type="checkbox" name="monitor" id="monitor"> <label for="monitor">Get CPU and memory usage, temperature status</label>
+<div id="eltex_feat">
+<input type="checkbox" name="monitor" id="monitor"> <label for="monitor">Get CPU usage and temperature status</label>
 </div>
 
 <h2>Triggers</h2>
 <input type="checkbox" name="tgport" id="tgport"> <label for="tgport">Port is down</label><br>
 In/out errors on port &gt; <input type="text" name="errorstreshold" value="" size="2"><br>
-<div id="cisco_triggers">
+<div id="eltex_triggers">
 CPU load &gt; <input type="text" name="cputreshold" value="80" size="2">%<br>
-Memory load &gt; <input type="text" name="memorytreshold" value="" size="3">Mb<br>
+<!-- Memory load &gt; <input type="text" name="memorytreshold" value="" size="3">Mb<br> --> <!-- Eltex don't provide memory usage -->
 </div>
 <input type="submit" value="Generate template">
 </form>
 </body>
 </html>
+
 <?php
 }
 ?>
